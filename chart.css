@@ -1,0 +1,40 @@
+.chartContainer {
+    width: 95%;
+    height: 97%;
+    margin: 0px auto;
+}
+
+body {
+  height: 100vh;  
+}
+
+div {
+  height: 100vh;
+}
+
+div#price {
+  left: 30px;
+  top: 30px;
+}
+
+div#percentage {
+  left: 30px;
+  top: 90px;
+}
+
+div.text {
+  font-family: helvetica,arial,verdana;
+  font-size: 35px;
+  color: blue;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  vertical-align: middle;
+  background-color: #DCE;
+  opacity: 0.5;
+  position: absolute;
+  width: 180px;
+  height: 50px;
+}

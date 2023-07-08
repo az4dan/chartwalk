@@ -1,150 +1,18 @@
-<!doctype html>
-<head>
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-p {
-    color: gray;
-    position: absolute;
-    bottom: 1em;
-    right: 2em;
-}
-nav {
-    position: absolute;
-    top: 1em;
-    left: 2em;
-}
-input {
-    margin-right: 1em;
-    padding: 0.5em;
-}
-</style>
-</head>
-<canvas></canvas>
-<p></p>
-<nav>
-    <input id="max_items" type="range" min="0" max="100000" step="10000" value="20000" title="20000">
-    <input id="delay" type="range" min="0" max="100" step="10" value="0" hidden="true">
-    <input id="enabled" type="button" value="stop">
-    <input id="reset" type="button" value="reset">
-    <input id="splice" type="button" value="splice">
-</nav>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module">
-
-let canvas = document.querySelector('canvas')
-let p = document.querySelector('p')
-
-let input_max_items = document.getElementById('max_items')
-let input_delay = document.getElementById('delay')
-let input_enabled = document.getElementById('enabled')
-let input_reset = document.getElementById('reset')
-let input_splice = document.getElementById('splice')
-
-let enabled = true
-let max_items = 20000
-let delay = 0
-let price = 0
-let i = 0
-
-let labels = []
-let data = []
-
-let chart = new Chart(canvas, {
-    type: 'line',
-    data: {
-        labels: labels,
-        datasets: [
-            {
-                data,
-            },
-        ],
-    },
-    options: {
-        animation: false,
-        datasets: {
-            line: {
-                borderWidth: 1,
-                pointRadius: 0,
-                pointHitRadius: 0,
-            },
-        },
-        scales: {
-            x: {
-                display: false,
-                grid: {
-                    display: false,
-                },
-            },
-            y: {
-                grid: {
-                    display: false,
-                },
-                suggestedMin: -100,
-                suggestedMax: 100,
-            },
-        },
-        plugins: {
-            legend: {
-                display: false,
-            },
-            tooltip: {
-                enabled: false,
-            },
-        },
-    },
-})
-
-input_max_items.addEventListener('change', function (event) {
-    max_items = event.target.value
-    labels.splice(0, labels.length - max_items)
-    data.splice(0, data.length - max_items)
-    event.target.title = max_items
-})
-input_delay.addEventListener('change', function (event) {
-    delay = event.target.value
-})
-input_enabled.addEventListener('click', function (event) {
-    if (event.target.value === 'stop') {
-        enabled = false
-        event.target.value = 'start'
-    } else {
-        enabled = true
-        event.target.value = 'stop'
-    }
-})
-input_reset.addEventListener('click', function (event) {
-    labels.splice(0, Infinity)
-    data.splice(0, Infinity)
-    chart.update()
-})
-input_splice.addEventListener('click', function (event) {
-    labels.splice(0, Math.trunc(labels.length / 2))
-    data.splice(0, Math.trunc(data.length / 2))
-    chart.update()
-})
-
-while (true) {
-    await new Promise(resolve => setTimeout(resolve, delay))
-    if (! enabled) continue
-
-    let coinflip = Math.random() < 0.5
-    price += coinflip ? 1 : -1
-
-    if (data.length >= max_items) {
-        labels.shift()
-        data.shift()
-    }
-
-    labels.push(i)
-    data.push(price)
-    chart.update()
-
-    i++
-    p.textContent = `${data.length.toLocaleString()} / ${i.toLocaleString()}`
-}
-
-</script>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>RNG Chart</title>
+    <link rel="stylesheet" href="chart.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js"></script>
+  </head>
+  <body>
+    <div class="chartContainer">
+      <canvas id="myChart"></canvas>
+    </div>
+    <div id="price" class="text"></div>
+    <div id="percentage" class="text"></div>
+    <script type="text/javascript" src="chart.js"></script>
+  </body>
+</html>
