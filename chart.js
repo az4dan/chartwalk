@@ -42,6 +42,24 @@ function initChart(ctx) {
                         pointStyle: 'line',
                         usePointStyle: true
                     }
+                },
+                zoom: {
+                    limits: {
+                        y: {
+                            min: INITIAL_PRICE-500,
+                            max: INITIAL_PRICE+500
+                        }
+                    },
+                    zoom: {
+                        wheel: {
+                            enabled: true,
+                            speed: 0.01
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        mode: 'y'
+                    }
                 }
             },
             scales: {
@@ -134,12 +152,12 @@ function updateRandomThresholdWithScheduling() {
 }
 
 // randomly introduce volatility, where volatility is defined as short refreshes & higher threshold
-// volatility generally lasts between 10 and 35 seconds
+// volatility generally lasts between 10 and 25 seconds
 function introduceVolatility() {
     volatility = true;
     updateRandomPriceRefresh();
     updateRandomThreshold();
-    let timeout = nextRandomIntervalBetween(10_000, 35_000);
+    let timeout = nextRandomIntervalBetween(10_000, 25_000);
     console.error(`[ scheduled volatility to end @ ${timeout/1000} seconds ]`);
     setTimeout(stopVolatility, timeout);
 }
@@ -149,7 +167,7 @@ function stopVolatility() {
     volatility = false;
     updateRandomPriceRefresh();
     updateRandomThreshold();
-    let timeout = nextRandomIntervalBetween(35_000, 85_000);
+    let timeout = nextRandomIntervalBetween(25_000, 85_000);
     console.error(`[ scheduled next volatility @ ${timeout/1000} seconds ]`);
     setTimeout(introduceVolatility, timeout);
 }
