@@ -12,7 +12,6 @@ function getDataset(yAxisID, label, borderColor, borderWidth, order) {
         backgroundColor: TRANSPARENT,
         pointStyle: false,
         data: Array(1000).fill(INITIAL_PRICE),
-        // Array(TOTAL_SEGMENTS)
         yAxisID,
         borderWidth,
         order
@@ -100,6 +99,7 @@ function updatePrice() {
 function updateRandomPriceRefresh() {
     // random price refresh timer should always fall between 200ms and 3s
     randomPriceRefresh = nextRandomIntervalBetween(100, 2000);
+    printLogs();
     // set up when next to change the 
     setTimeout(updateRandomPriceRefresh, nextRandomIntervalBetween(10_000, 120_000));
 }
@@ -107,9 +107,37 @@ function updateRandomPriceRefresh() {
 function updateRandomThreshold() {
     // random threshold should always fall between 45 and 55
     randomThreshold = 0.5 + ((Math.random() - 0.5) / 10);
-    console.log(`Random threshold changed: ${randomThreshold}`);
+    printLogs();
     // set up when next to change the threshold
     setTimeout(updateRandomThreshold, nextRandomIntervalBetween(60_000, 120_000));
+}
+
+/**
+ * randomly introduce volatility, where volatility is defined as short refreshes & higher threshold
+ */
+function introduceVolatility() {
+    // high volatility periods should be between 0.15-0.3 or 0.7-0.85
+    randomThreshold = (Math.random() < 0.5 ? 0.15 : 0.7) + ((Math.random() * 3) / 20);
+    randomPriceRefresh = 100;
+    printLogs(true);
+    setTimeout(introduceVolatility, nextRandomIntervalBetween(240_000, 300_000));
+    // let this volatility last anywhere between 5 - 30 seconds
+    setTimeout(updateRandomThreshold, nextRandomIntervalBetween(5_000, 30_000))
+}
+
+function printLogs(highVol) {
+    if (highVol) {
+        console.error(`HIGH VOL! Threshold changed: ${randomThreshold}`);
+        console.error(`HIGH VOL! Refresh time: ${randomPriceRefresh}`);
+        console.error(`HIGH VOL! Price: ${price}`);
+        console.error(`HIGH VOL! Ticks: ${ticks}`);
+    } else {
+        console.log(`>>>>>>>>>>>>>>>>>`);
+        console.log(`Threshold changed: ${randomThreshold}`);
+        console.log(`Refresh time: ${randomPriceRefresh}`);
+        console.log(`Price: ${price}`);
+        console.log(`Ticks: ${ticks}`);
+    }
 }
 
 function nextRandomIntervalBetween(min, max) {
@@ -137,3 +165,4 @@ setInterval(function() {
 updatePrice();
 updateRandomPriceRefresh();
 updateRandomThreshold();
+introduceVolatility();
