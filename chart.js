@@ -57,8 +57,8 @@ function initChart(ctx) {
                 y: {
                     display: true,
                     position: 'right',
-                    suggestedMin: 3850,
-                    suggestedMax: 3950,
+                    suggestedMin: INITIAL_PRICE-20,
+                    suggestedMax: INITIAL_PRICE+20,
                 }
             }
         }
@@ -77,6 +77,7 @@ let randomThreshold = 0.5;
 let randomPriceRefresh = 100;
 let up = 1_000;
 let ticks = 2_000;
+let volatility = false;
 
 function refreshUI() {
     chart.data.datasets[0].data.shift();
@@ -105,10 +106,16 @@ function updateRandomPriceRefresh() {
 }
 
 function updateRandomThreshold() {
-    // random threshold should always fall between 45 and 55
-    randomThreshold = 0.5 + ((Math.random() - 0.5) / 10);
+    if (volatility) {
+        // high volatility periods should be between 0.15-0.3 or 0.7-0.85
+        randomThreshold = (Math.random() < 0.5 ? 0.15 : 0.7) + ((Math.random() * 3) / 20);
+        // price generally refreshes quickly during high vol periods
+        randomPriceRefresh = 100;
+    } else {
+        // normal threshold should always fall between 45 and 55
+        randomThreshold = 0.5 + ((Math.random() - 0.5) / 10);
+    }
     printLogs();
-    // set up when next to change the threshold
     setTimeout(updateRandomThreshold, nextRandomIntervalBetween(60_000, 120_000));
 }
 
@@ -116,17 +123,21 @@ function updateRandomThreshold() {
  * randomly introduce volatility, where volatility is defined as short refreshes & higher threshold
  */
 function introduceVolatility() {
-    // high volatility periods should be between 0.15-0.3 or 0.7-0.85
-    randomThreshold = (Math.random() < 0.5 ? 0.15 : 0.7) + ((Math.random() * 3) / 20);
-    randomPriceRefresh = 100;
-    printLogs(true);
-    setTimeout(introduceVolatility, nextRandomIntervalBetween(240_000, 300_000));
-    // let this volatility last anywhere between 5 - 30 seconds
-    setTimeout(updateRandomThreshold, nextRandomIntervalBetween(5_000, 30_000))
+    volatility = true;
+    let timeout = nextRandomIntervalBetween(5_000, 30_000);
+    console.log(`.. scheduled volatility to end @ ${timeout/1000} seconds`);
+    setTimeout(stopVolatility, timeout);
 }
 
-function printLogs(highVol) {
-    if (highVol) {
+function stopVolatility() {
+    volatility = false;
+    let timeout = nextRandomIntervalBetween(60_000, 300_000);
+    console.log(`.. scheduled next volatility @ ${timeout/1000} seconds`);
+    setTimeout(introduceVolatility, timeout);
+}
+
+function printLogs() {
+    if (volatility) {
         console.error(`HIGH VOL! Threshold changed: ${randomThreshold}`);
         console.error(`HIGH VOL! Refresh time: ${randomPriceRefresh}`);
         console.error(`HIGH VOL! Price: ${price}`);
@@ -165,4 +176,4 @@ setInterval(function() {
 updatePrice();
 updateRandomPriceRefresh();
 updateRandomThreshold();
-introduceVolatility();
+stopVolatility();
