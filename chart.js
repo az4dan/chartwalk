@@ -134,22 +134,22 @@ function updateRandomThresholdWithScheduling() {
 }
 
 // randomly introduce volatility, where volatility is defined as short refreshes & higher threshold
-// volatility generally lasts between 10 and 60 seconds
+// volatility generally lasts between 10 and 35 seconds
 function introduceVolatility() {
     volatility = true;
     updateRandomPriceRefresh();
     updateRandomThreshold();
-    let timeout = nextRandomIntervalBetween(10_000, 60_000);
+    let timeout = nextRandomIntervalBetween(10_000, 35_000);
     console.error(`[ scheduled volatility to end @ ${timeout/1000} seconds ]`);
     setTimeout(stopVolatility, timeout);
 }
 
-// end volatility period. next volatility period is scheduled between 1 to 3 minutes
+// end volatility period. next volatility period is scheduled between 35 and 85 seconds
 function stopVolatility() {
     volatility = false;
     updateRandomPriceRefresh();
     updateRandomThreshold();
-    let timeout = nextRandomIntervalBetween(60_000, 180_000);
+    let timeout = nextRandomIntervalBetween(35_000, 85_000);
     console.error(`[ scheduled next volatility @ ${timeout/1000} seconds ]`);
     setTimeout(introduceVolatility, timeout);
 }
