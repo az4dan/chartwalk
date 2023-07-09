@@ -96,6 +96,12 @@ let randomPriceRefresh = 100;
 let up = 1_000;
 let ticks = 2_000;
 let volatility = false;
+let velocity = 0;
+let acceleration = 0;
+
+// stored values for velocity & acceleration calculations
+let pos = Array(10).fill({price:0, time:0});
+let vel = Array(10).fill({velocity:0, time:0});
 
 function refreshUI() {
     chart.data.datasets[0].data.shift();
@@ -104,6 +110,8 @@ function refreshUI() {
 
     priceText.textContent = `${price.toFixed(2)}`;
     percentText.textContent = `${(up/ticks).toFixed(5)}`;
+    velocityText.textContent = `${velocity.toFixed(2)}`;
+    accelerationText.textContent = `${acceleration.toFixed(2)}`;
 }
 
 function updatePrice() {
@@ -111,6 +119,17 @@ function updatePrice() {
     price += coinflip ? -0.25 : 0.25;
     if (coinflip) up++;
     ticks++;
+
+    // calculate the velocity from pos (avg velocity for last 10 ticks)
+    pos.shift();
+    pos.push({price: price, time: (Date.now() / 1000)});
+    velocity = pos.map ( d => (pos[9].price-d.price) / Math.max(1, pos[9].time-d.time) ).reduce((a, b) => a + b, 0) * 10;
+
+    // calculate the acceleration from vel (avg acceleration for the last 10 ticks)
+    vel.shift();
+    vel.push({velocity: velocity, time: (Date.now() / 1000)});
+    acceleration = vel.map ( d => (vel[9].velocity-d.velocity) / Math.max(1, vel[9].time-d.time) ).reduce((a, b) => a + b, 0);
+
     // set up when next to change the price
     setTimeout(updatePrice, randomPriceRefresh);
 }
@@ -167,7 +186,7 @@ function stopVolatility() {
     volatility = false;
     updateRandomPriceRefresh();
     updateRandomThreshold();
-    let timeout = nextRandomIntervalBetween(25_000, 85_000);
+    let timeout = nextRandomIntervalBetween(40_000, 80_000);
     console.error(`[ scheduled next volatility @ ${timeout/1000} seconds ]`);
     setTimeout(introduceVolatility, timeout);
 }
@@ -186,6 +205,8 @@ function nextRandomIntervalBetween(min, max) {
 var ctx = document.getElementById('myChart').getContext('2d');
 var priceText = document.getElementById('price');
 var percentText = document.getElementById('percentage');
+var velocityText = document.getElementById('velocity');
+var accelerationText = document.getElementById('acceleration');
 
 initChart(ctx);
 

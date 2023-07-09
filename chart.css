@@ -22,6 +22,16 @@ div#percentage {
   top: 90px;
 }
 
+div#velocity {
+  left: 30px;
+  top: 150px;
+}
+
+div#acceleration {
+  left: 30px;
+  top: 210px;
+}
+
 div.text {
   font-family: helvetica,arial,verdana;
   font-size: 35px;
