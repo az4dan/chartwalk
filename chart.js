@@ -1,17 +1,22 @@
+const RED = 'rgb(255, 99, 132)';
 const BLUE = 'rgb(54, 162, 235)';
+const GREEN = 'rgb(75, 192, 192)';
+const ORCHID = 'rgb(255, 165, 0)';
 const TRANSPARENT = '#00000000';
 const INITIAL_PRICE = 3900;
+const INITIAL_VELOCITY = 0;
+const INITIAL_ACCELERATION = 0;
 
 // chart
 var chart;
 
-function getDataset(yAxisID, label, borderColor, borderWidth, order) {
+function getDataset(yAxisID, label, borderColor, borderWidth, order, fill) {
     return {
         label,
         borderColor,
         backgroundColor: TRANSPARENT,
         pointStyle: false,
-        data: Array(1000).fill(INITIAL_PRICE),
+        data: Array(1000).fill(fill),
         yAxisID,
         borderWidth,
         order
@@ -20,7 +25,7 @@ function getDataset(yAxisID, label, borderColor, borderWidth, order) {
 
 function getDatasets() {
     return [
-        getDataset('y', 'Price', BLUE, 2, 1),
+        getDataset('y', 'Price', BLUE, 2, 1, INITIAL_PRICE)
     ];
 }
 
@@ -100,8 +105,9 @@ let velocity = 0;
 let acceleration = 0;
 
 // stored values for velocity & acceleration calculations
-let pos = Array(10).fill({price:0, time:0});
-let vel = Array(10).fill({velocity:0, time:0});
+const SIZE_OF_BUFFER = 10
+let pos = Array(SIZE_OF_BUFFER).fill({price:0, time:0});
+let vel = Array(SIZE_OF_BUFFER).fill({velocity:0, time:0});
 
 function refreshUI() {
     chart.data.datasets[0].data.shift();
@@ -123,12 +129,12 @@ function updatePrice() {
     // calculate the velocity from pos (avg velocity for last 10 ticks)
     pos.shift();
     pos.push({price: price, time: (Date.now() / 1000)});
-    velocity = pos.map ( d => (pos[9].price-d.price) / Math.max(1, pos[9].time-d.time) ).reduce((a, b) => a + b, 0) * 10;
+    velocity = pos.map ( d => (pos[SIZE_OF_BUFFER-1].price-d.price) / Math.max(1, pos[SIZE_OF_BUFFER-1].time-d.time) ).reduce((a, b) => a + b, 0) * 10;
 
     // calculate the acceleration from vel (avg acceleration for the last 10 ticks)
     vel.shift();
     vel.push({velocity: velocity, time: (Date.now() / 1000)});
-    acceleration = vel.map ( d => (vel[9].velocity-d.velocity) / Math.max(1, vel[9].time-d.time) ).reduce((a, b) => a + b, 0);
+    acceleration = vel.map ( d => (vel[SIZE_OF_BUFFER-1].velocity-d.velocity) / Math.max(1, vel[SIZE_OF_BUFFER-1].time-d.time) ).reduce((a, b) => a + b, 0);
 
     // set up when next to change the price
     setTimeout(updatePrice, randomPriceRefresh);
@@ -186,7 +192,7 @@ function stopVolatility() {
     volatility = false;
     updateRandomPriceRefresh();
     updateRandomThreshold();
-    let timeout = nextRandomIntervalBetween(40_000, 80_000);
+    let timeout = nextRandomIntervalBetween(25_000, 80_000);
     console.error(`[ scheduled next volatility @ ${timeout/1000} seconds ]`);
     setTimeout(introduceVolatility, timeout);
 }
